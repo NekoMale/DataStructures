@@ -11,4 +11,4 @@ StringElement NewStringItem(const char* string)
 	}
 	item->string = string;
 	return item;
-}
+}
