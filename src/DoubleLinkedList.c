@@ -1,7 +1,6 @@
 #include <stddef.h> // required for NULL
 #include <stdlib.h>
 #include <time.h>
-#include "LinkedList.h"
 #include "DoubleLinkedList.h"
 
 DoubleListElement GetDoubleListTail(DoubleListHead head) 
