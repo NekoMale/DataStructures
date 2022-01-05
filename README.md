@@ -11,6 +11,8 @@ Actually there are only:
 **Set** works only with string.
 I'm going to improve them in order to not have to declare a structure for every var type.
 
+#### Any examples provided in Main.c as well.
+
 ## LinkedList
 
 #### List informations availables:
