@@ -1,6 +1,6 @@
 #include <stddef.h> // required for NULL
 #include <stdio.h>
-#include "LinkedListExtension.h"
+#include "LinkedList.h"
 #include "DoubleLinkedListExtension.h"
 #include "Set.h"
 
@@ -9,13 +9,25 @@ void PrintNewSection()
 	printf("------------------------\n");
 }
 
-void PrintList(StringElement linkedList)
+void PrintStringList(List list)
 {
-	StringElement stringItem = linkedList;
-	while (stringItem)
+	printf("Printing string list:\n");
+	NodeList currentNode = *(list->nodes);
+	while (currentNode)
 	{
-		printf("%s\n", stringItem->string);
-		stringItem = (StringElement)stringItem->node.next;
+		printf("%s\n", (char*)currentNode->data);
+		currentNode = currentNode->next;
+	}
+}
+
+void PrintIntList(List list)
+{
+	printf("Printing int list:\n");
+	NodeList currentNode = *(list->nodes);
+	while (currentNode)
+	{
+		printf("%d\n", *(int*)currentNode->data);
+		currentNode = currentNode->next;
 	}
 }
 
@@ -57,11 +69,84 @@ void PrintSetElement(SetElement element, const char* key)
 		printf("There is no element with this key: %s\n", key);
 }
 
-int main()
-{
-	// LinkedListExercise();
-	// DoubleLinkedListExercise();
+void LinkedListExercise() {
+	List list = List_New(char);
+	char* stringa = "Test 001";
+	List_Append(list, stringa);
+	List_Append(list, "Test 002");
+	List_Append(list, "Test 003");
+	List_Append(list, "Test 004");
+	List_Append(list, "Test 005");
+	List_Append(list, "Test 006");
 
+	PrintStringList(list);
+	PrintNewSection();
+
+	List_Reverse(list);
+	PrintStringList(list);
+	PrintNewSection();
+
+	List_RemoveValueFromList(list, "Test 004");
+	List_RemoveValueFromList(list, "Test 001");
+	List_RemoveValueFromList(list, "Test 006");
+	M_List_RemoveLast(list);
+	List_RemoveValueFromList(list, 2);
+	PrintStringList(list);
+	PrintNewSection();
+
+
+	List list2 = List_New(int);
+
+	int a = 101;
+	int b = 2;
+	int c = 2;
+
+	List_Append(list2, &a);
+	List_Append(list2, &b);
+	List_RemoveValueFromList(list2, 2);
+	PrintIntList(list2);
+	PrintNewSection();
+
+	List list3 = List_New(char);
+	List_Append(list3, "Test 003");
+	printf("%s\n", (char*)(*(list3->nodes))->data);
+}
+
+void DoubleLinkedListExercise() {
+	DoubleStringElement doubleLinkedList = NULL;
+	DoubleListElement dElement1 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Hello World"));
+	DoubleListElement dElement2 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Test 001"));
+	DoubleListElement dElement3 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Test 002"));
+	DoubleListElement dElement4 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Last Item of the Double Linked List"));
+	PrintDoubleList(doubleLinkedList);
+	PrintNewSection();
+
+	RemoveFromDoubleList(doubleLinkedList, dElement2);
+	PrintDoubleList(doubleLinkedList);
+	PrintNewSection();
+
+	DoubleListElement dElement5 = InsertIntoDoubleListAfterElement(doubleLinkedList, NewDoubleStringItem("Test 003"), dElement3);
+	PrintDoubleList(doubleLinkedList);
+	PrintNewSection();
+
+	DoubleListElement dElement7 = InsertIntoDoubleListBeforeElement(doubleLinkedList, NewDoubleStringItem("Test 005"), dElement3);
+	PrintDoubleList(doubleLinkedList);
+	PrintNewSection();
+
+	DoubleListElement dElement6 = InsertIntoDoubleListBeforeElement(doubleLinkedList, NewDoubleStringItem("Test 004"), dElement1);
+	PrintDoubleList(doubleLinkedList);
+	PrintNewSection();
+
+	DoubleStringElement shuffledDoubleLinkedList = M_Clone((DoubleListHead)&doubleLinkedList);
+	M_Shuffle((DoubleListHead)&shuffledDoubleLinkedList);
+	PrintDoubleList(shuffledDoubleLinkedList);
+	PrintNewSection();
+
+	PrintDoubleList(doubleLinkedList);
+	PrintNewSection();
+}
+
+void SetExercise() {
 	TableElement table = NewTableSet(1);
 	SetElement element1 = InsertToSet(table, "Casa");
 	PrintSet(table);
@@ -118,62 +203,12 @@ int main()
 	Remove(table, "Pane");
 	PrintSet(table);
 	PrintNewSection();
-
-	return 0;
 }
 
-void LinkedListExercise() {
-	StringElement linkedList = NULL;
-	ListElement element1 = AppendToList((ListHead)&linkedList, (ListElement)NewStringItem("Hello World"));
-	ListElement element2 = AppendToList((ListHead)&linkedList, (ListElement)NewStringItem("Test001"));
-	ListElement element3 = AppendToList((ListHead)&linkedList, (ListElement)NewStringItem("Test002"));
-	ListElement element4 = AppendToList((ListHead)&linkedList, (ListElement)NewStringItem("Last Item of the Linked List"));
-	PrintList(linkedList);
-	PrintNewSection();
-
-	ReverseList((ListHead)&linkedList);
-	PrintList(linkedList);
-	PrintNewSection();
-
-	RemoveItemFromList((ListHead)&linkedList, element2);
-	PrintList(linkedList);
-	PrintNewSection();
-
-	RemoveLastFromList((ListHead)&linkedList);
-	PrintList(linkedList);
-	PrintNewSection();
-}
-
-void DoubleLinkedListExercise() {
-	DoubleStringElement doubleLinkedList = NULL;
-	DoubleListElement dElement1 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Hello World"));
-	DoubleListElement dElement2 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Test 001"));
-	DoubleListElement dElement3 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Test 002"));
-	DoubleListElement dElement4 = AppendToDoubleList(doubleLinkedList, NewDoubleStringItem("Last Item of the Double Linked List"));
-	PrintDoubleList(doubleLinkedList);
-	PrintNewSection();
-
-	RemoveFromDoubleList(doubleLinkedList, dElement2);
-	PrintDoubleList(doubleLinkedList);
-	PrintNewSection();
-
-	DoubleListElement dElement5 = InsertIntoDoubleListAfterElement(doubleLinkedList, NewDoubleStringItem("Test 003"), dElement3);
-	PrintDoubleList(doubleLinkedList);
-	PrintNewSection();
-
-	DoubleListElement dElement7 = InsertIntoDoubleListBeforeElement(doubleLinkedList, NewDoubleStringItem("Test 005"), dElement3);
-	PrintDoubleList(doubleLinkedList);
-	PrintNewSection();
-
-	DoubleListElement dElement6 = InsertIntoDoubleListBeforeElement(doubleLinkedList, NewDoubleStringItem("Test 004"), dElement1);
-	PrintDoubleList(doubleLinkedList);
-	PrintNewSection();
-
-	DoubleStringElement shuffledDoubleLinkedList = M_Clone((DoubleListHead)&doubleLinkedList);
-	M_Shuffle((DoubleListHead)&shuffledDoubleLinkedList);
-	PrintDoubleList(shuffledDoubleLinkedList);
-	PrintNewSection();
-
-	PrintDoubleList(doubleLinkedList);
-	PrintNewSection();
+int main()
+{
+	 LinkedListExercise();
+	 DoubleLinkedListExercise();
+	 SetExercise();
+	 return 0;
 }
