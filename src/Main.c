@@ -86,11 +86,11 @@ void LinkedListExercise() {
 	PrintStringList(list);
 	PrintNewSection();
 
-	List_RemoveValueFromList(list, "Test 004");
-	List_RemoveValueFromList(list, "Test 001");
-	List_RemoveValueFromList(list, "Test 006");
-	M_List_RemoveLast(list);
-	List_RemoveValueFromList(list, 2);
+	List_RemoveValue(list, "Test 004");
+	List_RemoveValue(list, "Test 001");
+	List_RemoveValue(list, "Test 006");
+	List_RemoveLast(list);
+	List_RemoveValue(list, 2);
 	PrintStringList(list);
 	PrintNewSection();
 
@@ -99,11 +99,11 @@ void LinkedListExercise() {
 
 	int a = 101;
 	int b = 2;
-	int c = 2;
-
+	int c = 33;
 	List_Append(list2, &a);
 	List_Append(list2, &b);
-	List_RemoveValueFromList(list2, 2);
+	List_Append(list2, &c);
+	List_RemoveValue(list2, 2);
 	PrintIntList(list2);
 	PrintNewSection();
 

@@ -5,7 +5,8 @@
 #include "LinkedList.h"
 
 #pragma region Internal
-NodeList I_List_GetTail(List list)
+
+NodeList I_List_GetLast(List list)
 {
 	if (list->length == 0) return NULL;
 	NodeList lastNode = NULL;
@@ -61,9 +62,9 @@ List M_List_New(const size_t elementSize)
 	return list;
 }
 
-void* M_List_GetTail(List list)
+void* M_List_GetLast(List list)
 {
-	NodeList node = I_List_GetTail(list);
+	NodeList node = I_List_GetLast(list);
 	if (node) return node->data;
 	return NULL;
 }
@@ -73,7 +74,7 @@ int M_List_Append(List list, void* value)
 	NodeList element = malloc(sizeof(T_NodeList) * list->elementSize);
 	if (!element) return 1;
 	element->data = value;
-	NodeList tail = I_List_GetTail(list);
+	NodeList tail = I_List_GetLast(list);
 	if (!tail)
 	{
 		*(list->nodes) = element;

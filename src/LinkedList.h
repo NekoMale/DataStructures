@@ -21,7 +21,7 @@ typedef struct S_List
 #define List T_List*
 
 
-#define List_RemoveValueFromList(list, value) \
+#define List_RemoveValue(list, value) \
 	_Generic((value), \
 	int: M_List_RemoveIntFromList, \
 	char*: M_List_RemoveStringFromList, \
@@ -29,16 +29,16 @@ typedef struct S_List
 	(list, value);
 
 #define List_New(elementType) M_List_New(sizeof(elementType))
-#define List_GetTail(list) M_List_GetTail((List) list)
 #define List_Append(list, value) M_List_Append((List) list, value)
 #define List_GetAt(list, index) M_List_GetAt((List) list, index)
+#define List_GetLast(list) M_List_GetLast((List) list)
 #define List_RemoveFirst(list) M_List_RemoveFirst((List) list)
 #define List_RemoveAt(list, index) M_List_RemoveAt((List) list, index)
 #define List_RemoveLast(list) M_List_RemoveLast((List) list)
 #define List_Reverse(list) M_List_Reverse((List) list)
 
 List M_List_New(const size_t elementSize);
-void* M_List_GetTail(List list);
+void* M_List_GetLast(List list);
 int M_List_Append(List list, void* value);
 void* M_List_GetAt(List list, int index);
 int M_List_RemoveFirst(List list);
