@@ -5,9 +5,8 @@ Actually there are only:
 - DoubleLinkedList
 - Set (unique keys)
 
-**LinkedList** is now generic.
+**LinkedList** and **DoubleLinkedList** are now generic.
 
-**DoubleLinkedList** either have already implemented a version with string value.<br>
 **Set** works only with string.
 I'm going to improve them in order to not have to declare a structure for every var type.
 
@@ -73,27 +72,23 @@ List_Append(list2, &c);
 ```
 
 ## DoubleLinkedList
-It can be declared with any var type inside "LinkedListExtension.h" in this way:
 
-```
-typedef struct SDouble{VarType}Item {
-	DoubleNodeList node;
-	const {VarType}* {VarName};
-} Double{VarType}Item;
-```
+#### DoubleLinkedList informations availables:
+- elementSize (var type bytes)
+- capacity (how many items can double linked list can have)
+- length (how many items double linked list actually has)
 
 #### DoubleLinkedList methods:
-- GetDoubleListTail
-- AppendToDoubleList
-- RemoveFromDoubleList
-- InsertIntoDoubleListAfterElement
-- InsertIntoDoubleListBeforeElement
-- GetDoubleElementAt
-- Length
-- Shuffle
-
-#### StringDoubleLinkedList methods:
-- Clone
+- DoubleList_New
+- DoubleList_Append
+- DoubleList_RemoveAt
+- DoubleList_GetAt
+- DoubleList_Shuffle
+- DoubleList_SwitchElements
+- DoubleList_Clone
+- DoubleList_InsertAfter
+- DoubleList_InsertBefore
+- DoubleList_IncreaseCapacity
  
 ## Set
 Actually it's only for strings. Set can only store unique key.<br>
