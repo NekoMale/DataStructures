@@ -1,14 +1,60 @@
 #include <stddef.h> // required for NULL
 #include <stdlib.h>
 #include <time.h>
-#include "DoubleLinkedList.h"
+#include "..\inc\DoubleLinkedList.h"
 
-DoubleListElement GetDoubleListTail(DoubleListHead head) 
+int M_DoubleList_IncreaseCapacity(DoubleList doubleList, int capacityDelta)
 {
-	DoubleListElement currentNode = *head;
-	if (currentNode)
+	if (capacityDelta < 1)
+		return -1;
+
+	HeadDoubleList newHead = (HeadDoubleList)realloc(doubleList->head, (doubleList->capacity + capacityDelta) * sizeof(T_NodeDoubleList) * doubleList->elementSize);
+	if (!newHead)
+		return -1;
+	
+	HeadDoubleList newTail = (HeadDoubleList)realloc(doubleList->tail, (doubleList->capacity + capacityDelta) * sizeof(T_NodeDoubleList) * doubleList->elementSize);
+	if (!newTail)
 	{
-		while (currentNode->next)
+		free(newHead);
+		return -1;
+	}
+
+	doubleList->capacity += capacityDelta;
+	return 0;
+}
+
+NodeDoubleList I_DoubleList_NewNode(const size_t elementSize, void* value)
+{
+	NodeDoubleList newElement = malloc(sizeof(T_NodeDoubleList) * elementSize);
+	if (!newElement) return NULL;
+	newElement->data = value;
+	return newElement;
+}
+
+NodeDoubleList I_DoubleList_GetAt(DoubleList doubleList, int index)
+{
+	if (doubleList->length == 0)
+		return NULL;
+	if (index < 0 || index >= doubleList->length)
+		return NULL;
+
+	if (index == 0)
+		return (*doubleList->head);
+	if (index == doubleList->length - 1)
+		return (*doubleList->tail);
+	NodeDoubleList currentNode;
+	if (index > (int)(doubleList->length * 0.5f))
+	{
+		currentNode = *doubleList->tail;
+		for (int i = doubleList->length - 1; i > index; --i)
+		{
+			currentNode = currentNode->prev;
+		}
+	}
+	else
+	{
+		currentNode = *doubleList->head;
+		for (int i = 0; i < index; ++i)
 		{
 			currentNode = currentNode->next;
 		}
@@ -16,135 +62,245 @@ DoubleListElement GetDoubleListTail(DoubleListHead head)
 	return currentNode;
 }
 
-DoubleListElement M_AppendToDoubleList(DoubleListHead head, DoubleListElement item)
+int I_DoubleList_InsertFirst(DoubleList doubleList, void* value)
 {
-	DoubleListElement tail = GetDoubleListTail(head);
-	if (!tail)
+	NodeDoubleList newElement = I_DoubleList_NewNode(doubleList->elementSize, value);
+	if (!newElement)
+		return -1;
+	(*doubleList->head)->prev = newElement;
+	newElement->next = (*doubleList->head);
+	newElement->prev = NULL;
+	(*doubleList->head) = newElement;
+	++doubleList->length;
+	return 0;
+}
+
+int I_DoubleList_InsertLast(DoubleList doubleList, void* value)
+{
+	NodeDoubleList newElement = I_DoubleList_NewNode(doubleList->elementSize, value);
+	if (!newElement)
+		return -1;
+	newElement->prev = (*doubleList->tail);
+	newElement->next = NULL;
+	(*doubleList->tail)->next = newElement;
+	(*doubleList->tail) = newElement;
+	++doubleList->length;
+	return 0;
+}
+
+int I_DoubleList_InsertBefore(DoubleList doubleList, NodeDoubleList currentNode, void* value)
+{
+	NodeDoubleList newElement = I_DoubleList_NewNode(doubleList->elementSize, value);
+	if (!newElement)
+		return -1;
+	newElement->next = currentNode;
+	newElement->prev = currentNode->prev;
+	newElement->prev->next = newElement;
+	currentNode->prev = newElement;
+	++doubleList->length;
+	return 0;
+}
+
+int I_DoubleList_InsertAfter(DoubleList doubleList, NodeDoubleList currentNode, void* value)
+{
+	NodeDoubleList newElement = I_DoubleList_NewNode(doubleList->elementSize, value);
+	if (!newElement)
+		return -1;
+	newElement->prev = currentNode;
+	newElement->next = currentNode->next;
+	newElement->next->prev = newElement;
+	currentNode->next = newElement;
+	++doubleList->length;
+	return 0;
+}
+
+int M_DoubleList_InsertBefore(DoubleList doubleList, void* valueToInsert, void* valueToCheck)
+{
+	if (doubleList->length == 0)
+		return -1;
+	if ((*doubleList->head)->data == valueToCheck)
 	{
-		*head = item;
+		return I_DoubleList_InsertFirst(doubleList, valueToInsert);
 	}
 	else
 	{
-		tail->next = item;
+		if ((*doubleList->tail)->data == valueToCheck)
+		{
+			return I_DoubleList_InsertBefore(doubleList, (*doubleList->tail), valueToInsert);
+		}
+		NodeDoubleList currentNode = (*doubleList->head)->next;
+		while (currentNode)
+		{
+			if (currentNode->data == valueToCheck)
+			{
+				return I_DoubleList_InsertBefore(doubleList, currentNode, valueToInsert);
+			}
+		}
 	}
-	item->prev = tail;
-	item->next = NULL;
-	return item;
+	return -1;
 }
 
-DoubleListElement M_RemoveFromDoubleList(DoubleListHead head, DoubleListElement item)
+int M_DoubleList_InsertAfter(DoubleList doubleList, void* valueToInsert, void* valueToCheck)
 {
-	DoubleListElement prev = item->prev;
-	DoubleListElement next = item->next;
-	if(prev)
-		prev->next = next;
-	if(next)
-		next->prev = prev;
-	item->prev = NULL;
-	item->next = NULL;
-	return item;
-}
-
-DoubleListElement M_InsertIntoDoubleListAfterElement(DoubleListHead head, DoubleListElement itemToAdd, DoubleListElement afterItem)
-{
-	DoubleListElement next = afterItem->next;
-	afterItem->next = itemToAdd;
-	itemToAdd->prev = afterItem;
-	itemToAdd->next = next;
-	if (next)
-		next->prev = itemToAdd;
-	return itemToAdd;
-}
-
-DoubleListElement M_InsertIntoDoubleListBeforeElement(DoubleListHead head, DoubleListElement itemToAdd, DoubleListElement beforeItem)
-{
-	DoubleListElement prev = beforeItem->prev;
-	beforeItem->prev = itemToAdd;
-	itemToAdd->next = beforeItem;
-	itemToAdd->prev = prev;
-	if (prev)
-		prev->next = itemToAdd;
-	else 
-		*head = itemToAdd;
-	return itemToAdd;
-}
-
-DoubleListElement M_GetDoubleElementAt(DoubleListHead head, int index)
-{
-	if (index < 0) return NULL;
-	DoubleListElement currentNode = *head;
-	for (int i = 0; i < index; i++)
+	if (doubleList->length == 0)
+		return -1;
+	if ((*doubleList->tail)->data == valueToCheck)
 	{
-		if (!currentNode) return NULL;
-		currentNode = currentNode->next;
+		return I_DoubleList_InsertLast(doubleList, valueToInsert);
 	}
-	return currentNode;
+	else
+	{
+		if ((*doubleList->head)->data == valueToCheck)
+		{
+			return I_DoubleList_InsertAfter(doubleList, (*doubleList->head), valueToInsert);
+		}
+		NodeDoubleList currentNode = (*doubleList->head)->next;
+		while (currentNode)
+		{
+			if (currentNode->data == valueToCheck)
+			{
+				return I_DoubleList_InsertAfter(doubleList, currentNode, valueToInsert);
+			}
+		}
+	}
+	return -1;
 }
 
-int M_Length(DoubleListHead head) {
-	int length = 0;
-	DoubleListElement currentNode = *head;
+DoubleList M_DoubleList_New(const size_t elementSize)
+{
+	DoubleList doubleList = malloc(sizeof(T_DoubleList));
+	if (!doubleList)
+		return NULL;
+	doubleList->elementSize = elementSize;
+	doubleList->capacity = 5;
+	doubleList->length = 0;
+	doubleList->head = (HeadDoubleList)calloc(doubleList->capacity, sizeof(T_NodeDoubleList) * elementSize);
+	if (!doubleList->head)
+	{
+		free(doubleList);
+		return NULL;
+	}
+	doubleList->tail = (HeadDoubleList)calloc(doubleList->capacity, sizeof(T_NodeDoubleList) * elementSize);
+	if (!doubleList->tail)
+	{
+		free(doubleList->head);
+		free(doubleList);
+		return NULL;
+	}
+	return doubleList;
+}
+
+void* M_DoubleList_GetAt(DoubleList doubleList, int index)
+{
+	NodeDoubleList node = I_DoubleList_GetAt(doubleList, index);
+	if (!node) return NULL;
+	return node->data;
+}
+
+int M_DoubleList_Append(DoubleList doubleList, void* value)
+{
+	if (doubleList->length == 0)
+	{
+		NodeDoubleList element = I_DoubleList_NewNode(doubleList->elementSize, value);
+		if (!element)
+			return -1;
+		*(doubleList->head) = element;
+		*(doubleList->tail) = element;
+		element->prev = NULL;
+		element->next = NULL;
+		++(doubleList->length);
+	}
+	else {
+		return I_DoubleList_InsertLast(doubleList, value);
+	}
+	return 0;
+}
+
+void M_DoubleList_SwitchElements(DoubleList doubleList, int index1, int index2)
+{
+	NodeDoubleList node1 = I_DoubleList_GetAt(doubleList, index1);
+	NodeDoubleList node2 = I_DoubleList_GetAt(doubleList, index2);
+	void* app = node1->data;
+	node1->data = node2->data;
+	node2->data = app;
+}
+
+DoubleList M_DoubleList_Clone(DoubleList originalDoubleList)
+{
+	DoubleList clonedDoubleList = M_DoubleList_New(originalDoubleList->elementSize);
+	NodeDoubleList currentNode = (*originalDoubleList->head);
+
 	while (currentNode)
 	{
-		length++;
+		M_DoubleList_Append(clonedDoubleList, currentNode->data);
 		currentNode = currentNode->next;
 	}
-	return length;
+
+	return clonedDoubleList;
 }
 
-void M_Shuffle(DoubleListHead head)
+DoubleList M_DoubleList_Shuffle(DoubleList doubleList)
 {
-	srand(time(NULL));
-	int max = M_Length(head);
-	DoubleListElement currentNode = *head;
-	int timesToShuffle = ((rand() % max) + 1) * 2;
+	DoubleList shuffledDoubleList = M_DoubleList_Clone(doubleList);
 
-	for (int i = 0; i < timesToShuffle; i++)
+	srand(time(NULL));
+	int max = doubleList->length;
+	int timesToShuffle = (int)(doubleList->length * 0.5f);
+
+	for (int i = 0; i < timesToShuffle; ++i) 
 	{
 		int random1 = rand() % max;
 		int random2;
-		do {
+		do
+		{
 			random2 = rand() % max;
-		} while (random2 == random1);
+		} while (random1 == random2);
 
-		DoubleListElement element1 = M_GetDoubleElementAt(head, random1);
-		DoubleListElement element2 = M_GetDoubleElementAt(head, random2);
-
-		DoubleListElement prev1 = element1->prev;
-		DoubleListElement next1 = element1->next;
-
-		DoubleListElement prev2 = element2->prev;
-		DoubleListElement next2 = element2->next;
-
-		if (random1 == random2 - 1)
-		{
-			next1 = element1;
-			prev2 = element2;
-		}
-		else if (random1 == random2 + 1)
-		{
-			prev1 = element1;
-			next2 = element2;
-		}
-		element1->prev = prev2;
-		element1->next = next2;
-		element2->prev = prev1;
-		element2->next = next1;
-		
-		if (prev1)
-			prev1->next = element2;
-		else
-			*head = element2;
-		
-		if (next1)
-			next1->prev = element2;
-		
-		if (prev2)
-			prev2->next = element1;
-		else
-			*head = element1;
-		
-		if (next2)
-			next2->prev = element1;
+		M_DoubleList_SwitchElements(shuffledDoubleList, random1, random2);
 	}
+	return shuffledDoubleList;
+}
+
+int M_DoubleList_RemoveAt(DoubleList doubleList, int index)
+{
+	if (doubleList->length == 0)
+		return -1;
+	if (index < 0 || index >= doubleList->length)
+		return -1;
+
+	if (doubleList->length == 1)
+	{
+		*doubleList->head = NULL;
+		*doubleList->tail = NULL;
+	}
+	else 
+	{
+		NodeDoubleList currentNode;
+		if (index == 0)
+		{
+			currentNode = *doubleList->head;
+			*doubleList->head = currentNode->next;
+		}
+		else if (index == doubleList->length - 1) 
+		{
+			currentNode = *doubleList->tail;
+			*doubleList->tail = currentNode->prev;
+		}
+		else
+		{
+			NodeDoubleList lastNode = *doubleList->head;
+			currentNode = lastNode->next;
+			for (int i = 1; i < index; ++i)
+			{
+				lastNode = currentNode;
+				currentNode = currentNode->next;
+			}
+			lastNode->next = currentNode->next;
+			currentNode->next->prev = lastNode;
+		}
+		currentNode->next = NULL;
+		currentNode->prev = NULL;
+	}
+	--doubleList->length;
+	return 0;
 }

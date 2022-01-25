@@ -7,8 +7,8 @@ typedef struct S_NodeList
 	struct S_NodeList* next;
 } T_NodeList;
 
-#define NodeList T_NodeList*
-#define HeadList NodeList*
+typedef T_NodeList* NodeList;
+typedef NodeList* HeadList;
 
 typedef struct S_List
 {
@@ -18,7 +18,7 @@ typedef struct S_List
 	size_t length;
 } T_List;
 
-#define List T_List*
+typedef T_List* List;
 
 
 #define List_RemoveValue(list, value) \

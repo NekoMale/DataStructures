@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "LinkedList.h"
+#include "..\inc\LinkedList.h"
 
 #pragma region Internal
 
@@ -33,7 +33,7 @@ NodeList I_List_GetAt(List list, int index)
 	return NULL;
 }
 
-int I_List_IncreaseSize(List list)
+int I_List_IncreaseCapacity(List list)
 {
 	list->capacity *= 2;
 	HeadList newNodes = (HeadList)realloc(list->nodes, list->capacity * sizeof(T_NodeList) * list->elementSize);
@@ -42,7 +42,7 @@ int I_List_IncreaseSize(List list)
 		list->nodes = newNodes;
 		return 0;
 	}
-	return 1;
+	return -1;
 }
 #pragma endregion Internal
 
@@ -72,7 +72,7 @@ void* M_List_GetLast(List list)
 int M_List_Append(List list, void* value)
 {
 	NodeList element = malloc(sizeof(T_NodeList) * list->elementSize);
-	if (!element) return 1;
+	if (!element) return -1;
 	element->data = value;
 	NodeList tail = I_List_GetLast(list);
 	if (!tail)
@@ -86,7 +86,7 @@ int M_List_Append(List list, void* value)
 	element->next = NULL;
 	++list->length;
 	if (list->length > list->capacity - 2)
-		I_List_IncreaseSize(list);
+		I_List_IncreaseCapacity(list);
 	return 0;
 }
 
@@ -107,12 +107,12 @@ int M_List_RemoveFirst(List list)
 		--list->length;
 		return 0;
 	}
-	return 1;
+	return -1;
 }
 
 int M_List_RemoveLast(List list)
 {
-	if (list->length == 0) return 1;
+	if (list->length == 0) return -1;
 	NodeList previousNode = NULL;
 	NodeList lastNode = NULL;
 	NodeList currentNode = *(list->nodes);
@@ -152,7 +152,7 @@ int M_List_RemoveAt(List list, int index)
 		--list->length;
 		return 0;
 	}
-	return 1;
+	return -1;
 }
 
 void M_List_Remove(List list, NodeList lastNode, NodeList currentNode)
@@ -182,7 +182,7 @@ int M_List_RemoveIntFromList(List list, int value)
 		lastNode = currentNode;
 		currentNode = currentNode->next;
 	}
-	return 1;
+	return -1;
 }
 
 int M_List_RemoveFloatFromList(List list, float value)
@@ -199,7 +199,7 @@ int M_List_RemoveFloatFromList(List list, float value)
 		lastNode = currentNode;
 		currentNode = currentNode->next;
 	}
-	return 1;
+	return -1;
 }
 
 int M_List_RemoveStringFromList(List list, char* value)
@@ -216,7 +216,7 @@ int M_List_RemoveStringFromList(List list, char* value)
 		lastNode = currentNode;
 		currentNode = currentNode->next;
 	}
-	return 1;
+	return -1;
 }
 
 void M_List_Reverse(List list) 

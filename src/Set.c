@@ -1,6 +1,6 @@
 #include <stddef.h> // required for NULL
 #include <stdlib.h>
-#include "Set.h"
+#include "..\inc\Set.h"
 
 size_t djb33x_hash(const char* key, const size_t keylen)
 {
