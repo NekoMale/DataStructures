@@ -30,12 +30,18 @@ CLOVE_TEST(SetInitialization)
 	CLOVE_NOT_NULL(set->nodes);
 }
 
+CLOVE_TEST(SetIncreaseHashmapSize)
+{
+	NG_Set_Increase_Hashmap_Size(set, 10);
+	CLOVE_INT_EQ(set->hashmap_size, 11);
+}
+
 CLOVE_TEST(SetAddingOneElement)
 {
 	int val = 1;
 	size_t length = 1;
 	NG_Set_Add(set, &val, length);
-	CLOVE_INT_EQ(*(int*)(set->nodes[0]->key), 1);
+	CLOVE_INT_EQ(*(int*)((NG_KeySet)((*(set->nodes[0]->nodes))->data))->key, 1);
 }
 
 CLOVE_TEST(SetAddingTwoUniqueElements)
@@ -46,7 +52,7 @@ CLOVE_TEST(SetAddingTwoUniqueElements)
 	size_t length2 = 2;
 	NG_Set_Add(set, &val, length);
 	NG_Set_Add(set, &val2, length2);
-	CLOVE_INT_EQ(*(int*)(set->nodes[0]->next->key), 12);
+	CLOVE_INT_EQ(*(int*)((NG_KeySet)((*set->nodes[0]->nodes)->next->data))->key, 12);
 }
 
 CLOVE_TEST(SetAddingTwoDuplicateElements)
@@ -89,7 +95,7 @@ CLOVE_TEST(SetRemoveExistingKey)
 	NG_Set_Add(set, &val, length);
 	NG_Set_Add(set, &val2, length2);
 	NG_Set_Remove(set, &val2, length2);
-	CLOVE_NULL(set->nodes[0]->next);
+	CLOVE_NULL((*set->nodes[0]->nodes)->next);
 }
 
 CLOVE_TEST(SetRemoveNotExistingKey)
@@ -104,16 +110,10 @@ CLOVE_TEST(SetRemoveNotExistingKey)
 	CLOVE_INT_EQ(NG_Set_Remove(set, &val3, length2), -1);
 }
 
-CLOVE_TEST(SetIncreaseHashmapSize)
-{
-	NG_Set_Increase_Hashmap_Size(set, 10);
-	CLOVE_INT_EQ(set->hashmap_size, 11);
-}
-
 CLOVE_TEST(SetAutoIncreaseHashmapSize)
 {
 	int val = 1;
 	size_t length = 1;
 	NG_Set_Add(set, &val, length);
-	CLOVE_INT_EQ(set->hashmap_size, 2);
+	CLOVE_INT_EQ(set->hashmap_size, 5);
 }

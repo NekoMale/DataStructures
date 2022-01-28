@@ -4,56 +4,15 @@
 #include <string.h>
 #include "..\inc\LinkedList.h"
 
-#pragma region Internal
-
-NodeList I_List_GetLast(List list)
+NG_List __NG_List_New(const size_t elementSize, int(*compare_function)(const void* v1, const void* v2))
 {
-	if (list->length == 0) return NULL;
-	NodeList lastNode = NULL;
-	NodeList currentNode = *(list->nodes);
-	while (currentNode)
-	{
-		lastNode = currentNode;
-		currentNode = currentNode->next;
-	}
-	return lastNode;
-}
-
-NodeList I_List_GetAt(List list, int index)
-{
-	if (index < list->length)
-	{
-		NodeList currentNode = *(list->nodes);
-		for (int i = 0; i < index; ++i)
-		{
-			currentNode = currentNode->next;
-		}
-		return currentNode;
-	}
-	return NULL;
-}
-
-int I_List_IncreaseCapacity(List list)
-{
-	list->capacity *= 2;
-	HeadList newNodes = (HeadList)realloc(list->nodes, list->capacity * sizeof(T_NodeList) * list->elementSize);
-	if (newNodes)
-	{
-		list->nodes = newNodes;
-		return 0;
-	}
-	return -1;
-}
-#pragma endregion Internal
-
-List M_List_New(const size_t elementSize)
-{
-	List list = malloc(sizeof(T_List));
+	NG_List list = malloc(sizeof(NG_T_List));
 	if (!list) return NULL;
 	list->elementSize = elementSize;
 	list->capacity = 5;
 	list->length = 0;
-	list->nodes = (HeadList)calloc(list->capacity, sizeof(T_NodeList) * elementSize);
+	list->compare_function = compare_function;
+	list->nodes = (NG_HeadList)calloc(list->capacity, sizeof(NG_T_NodeList) * elementSize);
 	if (!list->nodes) 
 	{
 		free(list);
@@ -62,169 +21,133 @@ List M_List_New(const size_t elementSize)
 	return list;
 }
 
-void* M_List_GetLast(List list)
+int __NG_List_Increase_Capacity(NG_List list, const size_t capacity_increase_amount)
 {
-	NodeList node = I_List_GetLast(list);
-	if (node) return node->data;
-	return NULL;
+	list->capacity += capacity_increase_amount;
+	NG_HeadList newNodes = (NG_HeadList)realloc(list->nodes, list->capacity * sizeof(NG_T_NodeList) * list->elementSize);
+	if (!newNodes)
+	{
+		return -1;
+	}
+	list->nodes = newNodes;
+	return 0;
 }
 
-int M_List_Append(List list, void* value)
+int __NG_List_Add(NG_List list, void* value)
 {
-	NodeList element = malloc(sizeof(T_NodeList) * list->elementSize);
+	NG_NodeList element = malloc(sizeof(NG_T_NodeList) * list->elementSize);
 	if (!element) return -1;
 	element->data = value;
-	NodeList tail = I_List_GetLast(list);
+	NG_NodeList tail = *(list->nodes);
 	if (!tail)
 	{
 		*(list->nodes) = element;
 	}
 	else
 	{
+		while (tail->next)
+		{
+			tail = tail->next;
+		}
 		tail->next = element;
 	}
 	element->next = NULL;
 	++list->length;
 	if (list->length > list->capacity - 2)
-		I_List_IncreaseCapacity(list);
+		__NG_List_Increase_Capacity(list, list->capacity);
 	return 0;
 }
 
-void* M_List_GetAt(List list, int index)
+void* __NG_List_GetAt(NG_List list, int index)
 {
-	NodeList node = I_List_GetAt(list, index);
-	if (node) return node->data;
-	return NULL;
-}
-
-int M_List_RemoveFirst(List list)
-{
-	NodeList currentHead = *(list->nodes);
-	if (currentHead)
+	if (index < 0 || index >= list->length)
 	{
-		*(list->nodes) = currentHead->next;
-		currentHead->next = NULL;
-		--list->length;
-		return 0;
+		return NULL;
 	}
-	return -1;
-}
 
-int M_List_RemoveLast(List list)
-{
-	if (list->length == 0) return -1;
-	NodeList previousNode = NULL;
-	NodeList lastNode = NULL;
-	NodeList currentNode = *(list->nodes);
-	while (currentNode)
+	NG_NodeList currentNode = *(list->nodes);
+	for (int i = 0; i < index; ++i)
 	{
-		previousNode = lastNode;
-		lastNode = currentNode;
 		currentNode = currentNode->next;
 	}
-	if (previousNode)
-	{
-		previousNode->next = NULL;
-	}
-	else {
-		list->nodes = NULL;
-		list->nodes = (HeadList)calloc(list->capacity, sizeof(T_NodeList) * list->elementSize);
-	}
-	--list->length;
-	return 0;
+	return currentNode->data;
 }
 
-int M_List_RemoveAt(List list, int index)
+void* __NG_List_GetLast(NG_List list)
 {
-	if (index == 0)
-		return M_List_RemoveFirst(list);
-	else if (index < list->length) 
+	return __NG_List_GetAt(list, list->length - 1);
+}
+
+int __NG_List_RemoveAt(NG_List list, int index)
+{
+	if (index < 0 || index >= list->length)
 	{
-		NodeList lastNode = *(list->nodes);
-		NodeList currentNode = lastNode->next;
+		return -1;
+	}
+	
+	NG_NodeList last_node = *list->nodes;
+	if (index == 0)
+	{
+		*list->nodes = last_node->next;
+		last_node->next = NULL;
+	}
+	else
+	{
+		NG_NodeList current_node = last_node->next;
 		for (int i = 1; i < index; ++i)
 		{
-			lastNode = currentNode;
-			currentNode = currentNode->next;
+			last_node = current_node;
+			current_node = current_node->next;
 		}
-		lastNode->next = currentNode->next;
-		currentNode->next = NULL;
-		--list->length;
-		return 0;
+		last_node->next = current_node->next;
+		current_node->next = NULL;
 	}
-	return -1;
+	--(list->length);
+	return 0;
 }
 
-void M_List_Remove(List list, NodeList lastNode, NodeList currentNode)
+int __NG_List_RemoveFirst(NG_List list)
 {
-	if (lastNode)
-	{
-		lastNode->next = currentNode->next;
-	}
-	else {
-		*(list->nodes) = currentNode->next;
-	}
-	currentNode->next = NULL;
-	--list->length;
+	return __NG_List_RemoveAt(list, 0);
 }
 
-int M_List_RemoveIntFromList(List list, int value)
+int __NG_List_RemoveLast(NG_List list)
 {
-	NodeList lastNode = NULL;
-	NodeList currentNode = *(list->nodes);
-	while (currentNode)
+	return __NG_List_RemoveAt(list, list->length - 1);
+}
+
+int __NG_List_Remove(NG_List list, void* value_to_remove)
+{
+	NG_NodeList last_node;
+	NG_NodeList current_node = *list->nodes;
+	while (current_node)
 	{
-		if (value == *((int*)currentNode->data))
+		if (list->compare_function(value_to_remove, current_node->data) == 0)
 		{
-			M_List_Remove(list, lastNode, currentNode);
+			if (last_node)
+			{
+				last_node->next = current_node->next;
+			}
+			else
+			{
+				*list->nodes = current_node->next;
+			}
+			current_node->next = NULL;
+			--(list->length);
 			return 0;
 		}
-		lastNode = currentNode;
-		currentNode = currentNode->next;
+		last_node = current_node;
+		current_node = current_node->next;
 	}
 	return -1;
 }
 
-int M_List_RemoveFloatFromList(List list, float value)
+NG_List __NG_List_Reverse(NG_List list) 
 {
-	NodeList lastNode = NULL;
-	NodeList currentNode = *(list->nodes);
-	while (currentNode)
-	{
-		if (value == *((float*)currentNode->data))
-		{
-			M_List_Remove(list, lastNode, currentNode);
-			return 0;
-		}
-		lastNode = currentNode;
-		currentNode = currentNode->next;
-	}
-	return -1;
-}
-
-int M_List_RemoveStringFromList(List list, char* value)
-{
-	NodeList lastNode = NULL;
-	NodeList currentNode = *(list->nodes);
-	while (currentNode)
-	{
-		if (strcmp(value, (char*)(currentNode->data)) == 0)
-		{
-			M_List_Remove(list, lastNode, currentNode);
-			return 0;
-		}
-		lastNode = currentNode;
-		currentNode = currentNode->next;
-	}
-	return -1;
-}
-
-void M_List_Reverse(List list) 
-{
-	List newList = M_List_New(list->elementSize);
+	NG_List reversed_list = __NG_List_New(list->elementSize, list->compare_function);
 	for (int i = list->length - 1; i > -1 ; --i)
 	{
-		M_List_Append(newList, M_List_GetAt(list, i));
+		__NG_List_Add(reversed_list, __NG_List_GetAt(list, i));
 	}
-	*(list->nodes) = *(newList->nodes);
+	return reversed_list;
 }

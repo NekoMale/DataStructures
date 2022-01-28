@@ -1,6 +1,7 @@
 #include <stddef.h> // required for NULL
 #include <stdlib.h>
 #include "..\inc\Set.h"
+#include "..\inc\LinkedList.h"
 
 size_t djb33x_hash(const void* key, const size_t key_length)
 {
@@ -27,9 +28,17 @@ NG_TableSet __NG_Set_New_Hashed(const size_t hashmap_size, size_t(*hash_function
 	set->hashmap_size = hashmap_size;
 	set->hash_function = hash_function;
 	set->compare_node_function = compare_function;
-	set->nodes = (NG_HeadSet)calloc(hashmap_size, sizeof(NG_T_NodeSet));
+	set->nodes = (NG_List*)malloc(sizeof(NG_T_List));
 	if (!set->nodes)
 	{
+		free(set);
+		return NULL;
+	}
+	*(set->nodes) = NG_List_New(NG_T_KeySet, compare_function);
+	if (!(*set->nodes))
+	{
+		free(set->nodes);
+		set->nodes = NULL;
 		free(set);
 		return NULL;
 	}
@@ -41,27 +50,36 @@ int __NG_Set_Add(NG_TableSet set, const void* value, const size_t key_length)
 	size_t hash = set->hash_function(value, key_length);
 	size_t index = hash % set->hashmap_size;
 
-	NG_NodeSet new_element = (NG_NodeSet)malloc(sizeof(NG_T_NodeSet));
+	NG_NodeList new_element = (NG_NodeList)malloc(sizeof(NG_T_NodeList));
 	if (!new_element)
 	{
 		return -1;
 	}
-	new_element->key = value;
-	new_element->key_length = key_length;
+
+	NG_KeySet set_element = (NG_KeySet)malloc(sizeof(NG_T_KeySet));
+	if (!set_element)
+	{
+		return -1;
+	}
+
+	set_element->key_length = key_length;
+	set_element->key = value;
+
+	new_element->data = set_element;
 	new_element->next = NULL;
 
 	size_t node_length = 1;
-	NG_NodeSet head = set->nodes[index];
+	NG_NodeList head = *set->nodes[index]->nodes;
 	if (!head)
 	{
-		set->nodes[index] = new_element;
+		*(set->nodes[index]->nodes) = new_element;
 	}
 	else
 	{
-		NG_NodeSet tail;
+		NG_NodeList tail;
 		do
 		{
-			if (set->compare_node_function(head->key, value) == 0)
+			if (set->compare_node_function(((NG_KeySet)(head->data))->key, value) == 0)
 			{
 				free(new_element);
 				return -1;
@@ -74,7 +92,9 @@ int __NG_Set_Add(NG_TableSet set, const void* value, const size_t key_length)
 	}
 	if (node_length > (size_t)(set->hashmap_size * 0.5f))
 	{
-		__NG_Set_Increase_Hashmap_Size(set, set->hashmap_size);
+		size_t increase_size = set->hashmap_size;
+		if (increase_size < 4) increase_size = 4;
+		__NG_Set_Increase_Hashmap_Size(set, increase_size);
 	}
 	return 0;
 }
@@ -84,10 +104,10 @@ int __NG_Set_Exists(NG_TableSet set, void* value, const size_t key_length)
 	size_t hash = set->hash_function(value, key_length);
 	size_t index = hash % set->hashmap_size;
 
-	NG_NodeSet head = set->nodes[index];
+	NG_NodeList head = *set->nodes[index]->nodes;
 	while (head)
 	{
-		if (set->compare_node_function(head->key, value) == 0)
+		if (set->compare_node_function(((NG_KeySet)(head->data))->key, value) == 0)
 		{
 			return 0;
 		}
@@ -101,18 +121,18 @@ int __NG_Set_Remove(NG_TableSet set, void* value, const size_t key_length)
 	size_t hash = set->hash_function(value, key_length);
 	size_t index = hash % set->hashmap_size;
 
-	NG_NodeSet lastNode;
-	NG_NodeSet node = set->nodes[index];
+	NG_NodeList lastNode;
+	NG_NodeList node = *set->nodes[index]->nodes;
 	while (node)
 	{
-		if (set->compare_node_function(node->key, value) == 0)
+		if (set->compare_node_function(((NG_KeySet)(node->data))->key, value) == 0)
 		{
 			if (lastNode)
 			{
 				lastNode->next = node->next;
 			}
 			else {
-				set->nodes[index] = node->next;
+				*set->nodes[index]->nodes = node->next;
 			}
 			return 0;
 		}
@@ -133,10 +153,11 @@ int __NG_Set_Increase_Hashmap_Size(NG_TableSet set, const size_t size_increase_a
 	const size_t current_set_size = set->hashmap_size;
 	for (size_t i = 0; i < current_set_size; ++i)
 	{
-		NG_NodeSet current_node = set->nodes[i];
+		NG_NodeList current_node = *(set->nodes[i]->nodes);
 		while (current_node)
 		{
-			__NG_Set_Add(larger_set, current_node->key, current_node->key_length);
+			NG_KeySet node_value = (NG_KeySet)(current_node->data);
+			__NG_Set_Add(larger_set, node_value->key, node_value->key_length);
 			current_node = current_node->next;
 		}
 	}

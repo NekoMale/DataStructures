@@ -1,51 +1,45 @@
 #pragma once
 #include <stdint.h>
 
-typedef struct S_NodeList
+typedef struct NG_S_NodeList
 {
 	void* data;
-	struct S_NodeList* next;
-} T_NodeList;
+	struct NG_S_NodeList* next;
+} NG_T_NodeList;
 
-typedef T_NodeList* NodeList;
-typedef NodeList* HeadList;
+typedef NG_T_NodeList* NG_NodeList;
+typedef NG_NodeList* NG_HeadList;
 
-typedef struct S_List
+typedef struct NG_S_List
 {
-	HeadList nodes;
+	NG_HeadList nodes;
 	size_t elementSize;
 	size_t capacity;
 	size_t length;
-} T_List;
+	int(*compare_function)(const void*, const void*);
+} NG_T_List;
 
-typedef T_List* List;
+typedef NG_T_List* NG_List;
+
+#define NG_List_New(elementType, compare_function) __NG_List_New(sizeof(elementType), compare_function)
+#define NG_List_Increase_Capacity(list, capacity_increase_amount) __NG_List_Increase_Capacity((NG_List)list, capacity_increase_amount)
+#define NG_List_Add(list, value) __NG_List_Add((NG_List) list, value)
+#define NG_List_GetAt(list, index) __NG_List_GetAt((NG_List) list, index)
+#define NG_List_Reverse(list) __NG_List_Reverse((NG_List) list)
+#define NG_List_GetLast(list) __NG_List_GetLast((NG_List) list)
+#define NG_List_RemoveFirst(list) __NG_List_RemoveFirst((NG_List) list)
+#define NG_List_RemoveAt(list, index) __NG_List_RemoveAt((NG_List) list, index)
+#define NG_List_RemoveLast(list) __NG_List_RemoveLast((NG_List) list)
+#define NG_List_Remove(list, value_to_remove) __NG_List_Remove((NG_List) list, value_to_remove)
 
 
-#define List_RemoveValue(list, value) \
-	_Generic((value), \
-	int: M_List_RemoveIntFromList, \
-	char*: M_List_RemoveStringFromList, \
-	float: M_List_RemoveFloatFromList) \
-	(list, value);
-
-#define List_New(elementType) M_List_New(sizeof(elementType))
-#define List_Append(list, value) M_List_Append((List) list, value)
-#define List_GetAt(list, index) M_List_GetAt((List) list, index)
-#define List_GetLast(list) M_List_GetLast((List) list)
-#define List_RemoveFirst(list) M_List_RemoveFirst((List) list)
-#define List_RemoveAt(list, index) M_List_RemoveAt((List) list, index)
-#define List_RemoveLast(list) M_List_RemoveLast((List) list)
-#define List_Reverse(list) M_List_Reverse((List) list)
-
-List M_List_New(const size_t elementSize);
-void* M_List_GetLast(List list);
-int M_List_Append(List list, void* value);
-void* M_List_GetAt(List list, int index);
-int M_List_RemoveFirst(List list);
-int M_List_RemoveAt(List list, int index);
-int M_List_RemoveLast(List list);
-void M_List_Reverse(List list);
-
-int M_List_RemoveIntFromList(List list, int value);
-int M_List_RemoveFloatFromList(List list, float value);
-int M_List_RemoveStringFromList(List list, char* value);
+NG_List __NG_List_New(const size_t elementSize, int(*compare_function)(const void* v1, const void* v2));
+int __NG_List_Increase_Capacity(NG_List list, const size_t capacity_increase_amount);
+int __NG_List_Add(NG_List list, void* value);
+void* __NG_List_GetAt(NG_List list, int index);
+NG_List __NG_List_Reverse(NG_List list);
+void* __NG_List_GetLast(NG_List list);
+int __NG_List_RemoveFirst(NG_List list);
+int __NG_List_RemoveAt(NG_List list, int index);
+int __NG_List_RemoveLast(NG_List list);
+int __NG_List_Remove(NG_List list, void* value_to_remove);

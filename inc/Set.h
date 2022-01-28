@@ -2,19 +2,17 @@
 #include <string.h>
 #include "LinkedList.h"
 
-typedef struct NG_S_NodeSet
+typedef struct NG_S_KeySet
 {
 	size_t key_length;
 	const void* key;
-	struct NG_S_NodeSet* next;
-} NG_T_NodeSet;
+} NG_T_KeySet;
 
-typedef NG_T_NodeSet* NG_NodeSet;
-typedef NG_NodeSet* NG_HeadSet;
+typedef NG_T_KeySet* NG_KeySet;
 
 typedef struct NG_S_TableSet
 {
-	NG_HeadSet nodes;
+	NG_List* nodes;
 	size_t hashmap_size;
 	size_t(*hash_function)(const void*, size_t);
 	int(*compare_node_function)(const void*, const void*);
@@ -35,10 +33,3 @@ int __NG_Set_Add(NG_TableSet set, const void* value, const size_t key_length);
 int __NG_Set_Exists(NG_TableSet set, void* value, const size_t key_length);
 int __NG_Set_Remove(NG_TableSet set, void* value, const size_t key_length);
 int __NG_Set_Increase_Hashmap_Size(NG_TableSet set, const size_t size_increase_amount);
-
-//#define Search(table, key) M_Search((TableSet)table, key)
-//#define Remove(table, key) M_Remove((TableSet)table, key)
-//
-//NodeSet M_Search(TableSet table, const char* key);
-//NodeSet M_Remove(TableSet table, const char* key);
-//void M_IncreaseHashmapSize(TableSet table);
