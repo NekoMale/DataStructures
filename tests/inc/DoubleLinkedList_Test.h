@@ -14,6 +14,67 @@ CLOVE_TEST(DoubleListLength0)
 }
 #pragma endregion Initialization
 
+#pragma region IncreaseCapacity
+CLOVE_TEST(DoubleListIncreaseCapacityByZero)
+{
+	DoubleList doubleList = DoubleList_New(int);
+	int a = 1;
+	int b = 2;
+	DoubleList_Append(doubleList, &a);
+	DoubleList_Append(doubleList, &b);
+
+	CLOVE_INT_EQ(DoubleList_IncreaseCapacity(doubleList, 0), -1);
+}
+
+CLOVE_TEST(DoubleListIncreaseCapacityByNegativeNumber)
+{
+	DoubleList doubleList = DoubleList_New(int);
+	int a = 1;
+	int b = 2;
+	DoubleList_Append(doubleList, &a);
+	DoubleList_Append(doubleList, &b);
+
+	CLOVE_INT_EQ(DoubleList_IncreaseCapacity(doubleList, -1), -1);
+}
+
+CLOVE_TEST(DoubleListIncreaseCapacityEmptyList)
+{
+	DoubleList doubleList = DoubleList_New(int);
+	DoubleList_IncreaseCapacity(doubleList, 1);
+	CLOVE_INT_EQ(doubleList->capacity, 6);
+}
+
+CLOVE_TEST(DoubleListIncreaseCapacityNotEmptyList)
+{
+	DoubleList doubleList = DoubleList_New(int);
+	int a = 1;
+	int b = 2;
+	DoubleList_Append(doubleList, &a);
+	DoubleList_Append(doubleList, &b);
+
+	DoubleList_IncreaseCapacity(doubleList, 1);
+	CLOVE_INT_EQ(doubleList->capacity, 6);
+}
+
+CLOVE_TEST(DoubleListAutoIncreaseCapacity)
+{
+	DoubleList doubleList = DoubleList_New(int);
+	int a = 1;
+	int b = 2;
+	int c = 3;
+	DoubleList_Append(doubleList, &a);
+	DoubleList_Append(doubleList, &b);
+	DoubleList_Append(doubleList, &c);
+
+	CLOVE_INT_EQ(doubleList->capacity, 10);
+
+	int d = 4;
+	DoubleList_Append(doubleList, &d);
+
+	CLOVE_INT_EQ(doubleList->capacity, 10);
+}
+#pragma endregion IncreaseCapacity
+
 #pragma region Append
 CLOVE_TEST(DoubleListAddNotFail)
 {
@@ -431,54 +492,16 @@ CLOVE_TEST(DoubleListInsertBeforeTailCheckTail)
 }
 #pragma endregion InsertAfter
 
-#pragma region IncreaseCapacity
-CLOVE_TEST(DoubleListIncreaseCapacityByZero)
-{
-	DoubleList doubleList = DoubleList_New(int);
-	int a = 1;
-	int b = 2;
-	DoubleList_Append(doubleList, &a);
-	DoubleList_Append(doubleList, &b);
-
-	CLOVE_INT_EQ(DoubleList_IncreaseCapacity(doubleList, 0), -1);
-}
-
-CLOVE_TEST(DoubleListIncreaseCapacityByNegativeNumber)
-{
-	DoubleList doubleList = DoubleList_New(int);
-	int a = 1;
-	int b = 2;
-	DoubleList_Append(doubleList, &a);
-	DoubleList_Append(doubleList, &b);
-
-	CLOVE_INT_EQ(DoubleList_IncreaseCapacity(doubleList, -1), -1);
-}
-
-CLOVE_TEST(DoubleListIncreaseCapacityEmptyList)
-{
-	DoubleList doubleList = DoubleList_New(int);
-	DoubleList_IncreaseCapacity(doubleList, 1);
-	CLOVE_INT_EQ(doubleList->capacity, 6);
-}
-
-CLOVE_TEST(DoubleListIncreaseCapacityNotEmptyList)
-{
-	DoubleList doubleList = DoubleList_New(int);
-	int a = 1;
-	int b = 2;
-	DoubleList_Append(doubleList, &a);
-	DoubleList_Append(doubleList, &b);
-
-	DoubleList_IncreaseCapacity(doubleList, 1);
-	CLOVE_INT_EQ(doubleList->capacity, 6);
-}
-#pragma endregion IncreaseCapacity
-
 CLOVE_SUITE(DoubleLinkedListSuite)
 {
 	CLOVE_SUITE_TESTS(
 		DoubleListNotNULL,
 		DoubleListLength0,
+		DoubleListIncreaseCapacityByZero,
+		DoubleListIncreaseCapacityByNegativeNumber,
+		DoubleListIncreaseCapacityEmptyList,
+		DoubleListIncreaseCapacityNotEmptyList,
+		DoubleListAutoIncreaseCapacity,
 		DoubleListAddOneElementHead,
 		DoubleListAddOneElementTail,
 		DoubleListAddTwoElementHead,
@@ -509,10 +532,6 @@ CLOVE_SUITE(DoubleLinkedListSuite)
 		DoubleListInsertBeforeHead,
 		DoubleListInsertBeforeHeadCheckOldHead,
 		DoubleListInsertBeforeTail,
-		DoubleListInsertBeforeTailCheckTail,
-		DoubleListIncreaseCapacityByZero,
-		DoubleListIncreaseCapacityByNegativeNumber,
-		DoubleListIncreaseCapacityEmptyList,
-		DoubleListIncreaseCapacityNotEmptyList
+		DoubleListInsertBeforeTailCheckTail
 	);
 }

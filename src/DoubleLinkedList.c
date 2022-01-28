@@ -18,6 +18,8 @@ int M_DoubleList_IncreaseCapacity(DoubleList doubleList, int capacityDelta)
 		free(newHead);
 		return -1;
 	}
+	doubleList->head = newHead;
+	doubleList->tail = newTail;
 
 	doubleList->capacity += capacityDelta;
 	return 0;
@@ -72,6 +74,8 @@ int I_DoubleList_InsertFirst(DoubleList doubleList, void* value)
 	newElement->prev = NULL;
 	(*doubleList->head) = newElement;
 	++doubleList->length;
+	if (doubleList->length > (int)(doubleList->capacity * 0.5f))
+		M_DoubleList_IncreaseCapacity(doubleList, doubleList->capacity);
 	return 0;
 }
 
@@ -85,6 +89,8 @@ int I_DoubleList_InsertLast(DoubleList doubleList, void* value)
 	(*doubleList->tail)->next = newElement;
 	(*doubleList->tail) = newElement;
 	++doubleList->length;
+	if (doubleList->length > (int)(doubleList->capacity * 0.5f))
+		M_DoubleList_IncreaseCapacity(doubleList, doubleList->capacity);
 	return 0;
 }
 
@@ -98,6 +104,8 @@ int I_DoubleList_InsertBefore(DoubleList doubleList, NodeDoubleList currentNode,
 	newElement->prev->next = newElement;
 	currentNode->prev = newElement;
 	++doubleList->length;
+	if (doubleList->length > (int)(doubleList->capacity * 0.5f))
+		M_DoubleList_IncreaseCapacity(doubleList, doubleList->capacity);
 	return 0;
 }
 
@@ -111,6 +119,8 @@ int I_DoubleList_InsertAfter(DoubleList doubleList, NodeDoubleList currentNode, 
 	newElement->next->prev = newElement;
 	currentNode->next = newElement;
 	++doubleList->length;
+	if (doubleList->length > (int)(doubleList->capacity * 0.5f))
+		M_DoubleList_IncreaseCapacity(doubleList, doubleList->capacity);
 	return 0;
 }
 
@@ -209,6 +219,8 @@ int M_DoubleList_Append(DoubleList doubleList, void* value)
 		element->prev = NULL;
 		element->next = NULL;
 		++(doubleList->length);
+		if (doubleList->length > (int)(doubleList->capacity * 0.5f))
+			M_DoubleList_IncreaseCapacity(doubleList, doubleList->capacity);
 	}
 	else {
 		return I_DoubleList_InsertLast(doubleList, value);
