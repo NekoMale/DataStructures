@@ -18,19 +18,21 @@ ng_set __ng_dictionary_new_hashed(
 	}
 	dictionary->hashmap_size = hashmap_size;
 	dictionary->hash_function = hash_function;
-	dictionary->nodes = (ng_list*)malloc(sizeof(ng_t_list));
+	dictionary->nodes = (ng_list*)malloc(sizeof(ng_t_list) * hashmap_size);
 	if (!dictionary->nodes)
 	{
 		free(dictionary);
 		return NULL;
 	}
-	*(dictionary->nodes) = ng_list_new(ng_t_dictionary_pair, compare_function);
-	if (!(*dictionary->nodes))
+	for (int i = 0; i < hashmap_size; ++i)
 	{
-		free(dictionary->nodes);
-		dictionary->nodes = NULL;
-		free(dictionary);
-		return NULL;
+		dictionary->nodes[i] = ng_list_new(ng_t_dictionary_pair, compare_function);
+		if (!dictionary->nodes) {
+			free(dictionary->nodes);
+			dictionary->nodes = NULL;
+			free(dictionary);
+			return NULL;
+		}
 	}
 	return dictionary;
 }
