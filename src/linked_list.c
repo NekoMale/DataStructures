@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include "..\inc\linked_list.h"
 
-ng_list __ng_list_new(const size_t elementSize, int(*compare_function)(const void* v1, const void* v2))
+ng_list __ng_list_new(const size_t items_size, int(*compare_function)(const void* v1, const void* v2))
 {
 	ng_list list = malloc(sizeof(ng_t_list));
 	if (!list) return NULL;
-	list->elementSize = elementSize;
+	list->elementSize = items_size;
 	list->capacity = 5;
 	list->length = 0;
 	list->compare_function = compare_function;
-	list->nodes = (ng_head_list)calloc(list->capacity, sizeof(ng_t_node_list) * elementSize);
-	if (!list->nodes) 
+	list->nodes = (ng_head_list)calloc(list->capacity, sizeof(ng_t_node_list) * items_size);
+	if (!list->nodes)
 	{
 		free(list);
 		return NULL;
