@@ -27,19 +27,21 @@ ng_set __ng_set_new_hashed(const size_t hashmap_size, size_t(*hash_function)(con
 	}
 	set->hashmap_size = hashmap_size;
 	set->hash_function = hash_function;
-	set->nodes = (ng_list*)malloc(sizeof(ng_t_list));
+	set->nodes = (ng_list*)malloc(sizeof(ng_t_list) * hashmap_size);
 	if (!set->nodes)
 	{
 		free(set);
 		return NULL;
 	}
-	*(set->nodes) = ng_list_new(ng_t_key_set, compare_function);
-	if (!(*set->nodes))
+	for (int i = 0; i < hashmap_size; ++i)
 	{
-		free(set->nodes);
-		set->nodes = NULL;
-		free(set);
-		return NULL;
+		set->nodes[i] = ng_list_new(ng_key_set, compare_function);
+		if (!set->nodes) {
+			free(set->nodes);
+			set->nodes = NULL;
+			free(set);
+			return NULL;
+		}
 	}
 	return set;
 }
@@ -55,7 +57,7 @@ int __ng_set_add(ng_set set, const void* value, const size_t key_length)
 		return -1;
 	}
 
-	NG_KeySet set_element = (NG_KeySet)malloc(sizeof(ng_t_key_set));
+	ng_key_set set_element = (ng_key_set)malloc(sizeof(ng_t_key_set));
 	if (!set_element)
 	{
 		return -1;
@@ -66,6 +68,7 @@ int __ng_set_add(ng_set set, const void* value, const size_t key_length)
 
 	new_element->data = set_element;
 	new_element->next = NULL;
+
 
 	size_t node_length = 1;
 	ng_node_list head = *set->nodes[index]->nodes;
@@ -78,7 +81,7 @@ int __ng_set_add(ng_set set, const void* value, const size_t key_length)
 		ng_node_list tail;
 		do
 		{
-			if ((*set->nodes)->compare_function(((NG_KeySet)(head->data))->key, value) == 0)
+			if ((*set->nodes)->compare_function(((ng_key_set)(head->data))->key, value) == 0)
 			{
 				free(new_element);
 				return -1;
@@ -106,7 +109,7 @@ int __ng_set_exists(ng_set set, void* value, const size_t key_length)
 	ng_node_list head = *set->nodes[index]->nodes;
 	while (head)
 	{
-		if ((*set->nodes)->compare_function(((NG_KeySet)(head->data))->key, value) == 0)
+		if ((*set->nodes)->compare_function(((ng_key_set)(head->data))->key, value) == 0)
 		{
 			return 0;
 		}
@@ -124,7 +127,7 @@ int __ng_set_remove(ng_set set, void* value, const size_t key_length)
 	ng_node_list node = *set->nodes[index]->nodes;
 	while (node)
 	{
-		if ((*set->nodes)->compare_function(((NG_KeySet)(node->data))->key, value) == 0)
+		if ((*set->nodes)->compare_function(((ng_key_set)(node->data))->key, value) == 0)
 		{
 			if (lastNode)
 			{
@@ -158,7 +161,7 @@ int __ng_set_increase_hashmap_size(ng_set set, const size_t size_increase_amount
 			ng_node_list current_node = *(set->nodes[i]->nodes);
 			while (current_node)
 			{
-				NG_KeySet node_value = (NG_KeySet)(current_node->data);
+				ng_key_set node_value = (ng_key_set)(current_node->data);
 				__ng_set_add(larger_set, node_value->key, node_value->key_length);
 				current_node = current_node->next;
 			}

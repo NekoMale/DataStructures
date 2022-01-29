@@ -46,7 +46,7 @@ CLOVE_TEST(SetAddingOneElement)
 	int val = 1;
 	size_t length = 1;
 	ng_set_add(set, &val, length);
-	CLOVE_INT_EQ(*(int*)((NG_KeySet)((*(set->nodes[0]->nodes))->data))->key, 1);
+	CLOVE_INT_EQ(*(int*)((ng_key_set)((*(set->nodes[0]->nodes))->data))->key, 1);
 }
 
 CLOVE_TEST(SetAddingOneStringElement)
@@ -58,8 +58,8 @@ CLOVE_TEST(SetAddingOneStringElement)
 	size_t length2 = strlen(el2);
 	ng_set_add(set, el1, length);
 	ng_set_add(set, el2, length2);
-	CLOVE_STRING_EQ((char*)((NG_KeySet)((*(set->nodes[0]->nodes))->data))->key, "basic unit or maybe I should be another thing? I really don't know how much I can write without break it");
-	CLOVE_STRING_EQ((char*)((NG_KeySet)((*(set->nodes[0]->nodes))->next->data))->key, "basic unit or maybe I should be another thing? I really don't know how mucbreak it");
+	CLOVE_STRING_EQ((char*)((ng_key_set)((*(set->nodes[0]->nodes))->data))->key, "basic unit or maybe I should be another thing? I really don't know how much I can write without break it");
+	CLOVE_STRING_EQ((char*)((ng_key_set)((*(set->nodes[0]->nodes))->next->data))->key, "basic unit or maybe I should be another thing? I really don't know how mucbreak it");
 }
 
 CLOVE_TEST(SetAddingTwoUniqueElements)
@@ -70,7 +70,7 @@ CLOVE_TEST(SetAddingTwoUniqueElements)
 	size_t length2 = 2;
 	ng_set_add(set, &val, length);
 	ng_set_add(set, &val2, length2);
-	CLOVE_INT_EQ(*(int*)((NG_KeySet)((*set->nodes[0]->nodes)->next->data))->key, 12);
+	CLOVE_INT_EQ(*(int*)((ng_key_set)((*set->nodes[0]->nodes)->next->data))->key, 12);
 }
 
 CLOVE_TEST(SetAddingTwoDuplicateElements)

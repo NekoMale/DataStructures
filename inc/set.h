@@ -7,7 +7,7 @@ typedef struct ng_s_key_set
 	const void* key;
 } ng_t_key_set;
 
-typedef ng_t_key_set* NG_KeySet;
+typedef ng_t_key_set* ng_key_set;
 
 typedef struct ng_s_set
 {
