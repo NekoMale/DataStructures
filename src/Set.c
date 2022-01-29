@@ -1,7 +1,7 @@
 #include <stddef.h> // required for NULL
 #include <stdlib.h>
-#include "..\inc\Set.h"
-#include "..\inc\LinkedList.h"
+#include "..\inc\set.h"
+#include "..\inc\linked_list.h"
 
 size_t djb33x_hash(const void* key, const size_t key_length)
 {
@@ -14,27 +14,26 @@ size_t djb33x_hash(const void* key, const size_t key_length)
 	return hash;
 }
 
-NG_TableSet __NG_Set_New(int(*compare_function)(const void* v1, const void* v2)) {
-	return __NG_Set_New_Hashed(10, djb33x_hash, compare_function);
+ng_set __ng_set_new(int(*compare_function)(const void* v1, const void* v2)) {
+	return __ng_set_new_hashed(10, djb33x_hash, compare_function);
 }
 
-NG_TableSet __NG_Set_New_Hashed(const size_t hashmap_size, size_t(*hash_function)(const void* key, size_t key_length), int(*compare_function)(const void* v1, const void* v2)) 
+ng_set __ng_set_new_hashed(const size_t hashmap_size, size_t(*hash_function)(const void* key, size_t key_length), int(*compare_function)(const void* v1, const void* v2)) 
 {
-	NG_TableSet set = (NG_TableSet)malloc(sizeof(NG_T_TableSet));
+	ng_set set = (ng_set)malloc(sizeof(ng_t_set));
 	if (!set)
 	{
 		return NULL;
 	}
 	set->hashmap_size = hashmap_size;
 	set->hash_function = hash_function;
-	set->compare_node_function = compare_function;
-	set->nodes = (NG_List*)malloc(sizeof(NG_T_List));
+	set->nodes = (ng_list*)malloc(sizeof(ng_t_list));
 	if (!set->nodes)
 	{
 		free(set);
 		return NULL;
 	}
-	*(set->nodes) = NG_List_New(NG_T_KeySet, compare_function);
+	*(set->nodes) = ng_list_new(ng_t_key_set, compare_function);
 	if (!(*set->nodes))
 	{
 		free(set->nodes);
@@ -45,18 +44,18 @@ NG_TableSet __NG_Set_New_Hashed(const size_t hashmap_size, size_t(*hash_function
 	return set;
 }
 
-int __NG_Set_Add(NG_TableSet set, const void* value, const size_t key_length)
+int __ng_set_add(ng_set set, const void* value, const size_t key_length)
 {
 	size_t hash = set->hash_function(value, key_length);
 	size_t index = hash % set->hashmap_size;
 
-	NG_NodeList new_element = (NG_NodeList)malloc(sizeof(NG_T_NodeList));
+	ng_node_list new_element = (ng_node_list)malloc(sizeof(ng_t_node_list));
 	if (!new_element)
 	{
 		return -1;
 	}
 
-	NG_KeySet set_element = (NG_KeySet)malloc(sizeof(NG_T_KeySet));
+	NG_KeySet set_element = (NG_KeySet)malloc(sizeof(ng_t_key_set));
 	if (!set_element)
 	{
 		return -1;
@@ -69,17 +68,17 @@ int __NG_Set_Add(NG_TableSet set, const void* value, const size_t key_length)
 	new_element->next = NULL;
 
 	size_t node_length = 1;
-	NG_NodeList head = *set->nodes[index]->nodes;
+	ng_node_list head = *set->nodes[index]->nodes;
 	if (!head)
 	{
 		*(set->nodes[index]->nodes) = new_element;
 	}
 	else
 	{
-		NG_NodeList tail;
+		ng_node_list tail;
 		do
 		{
-			if (set->compare_node_function(((NG_KeySet)(head->data))->key, value) == 0)
+			if ((*set->nodes)->compare_function(((NG_KeySet)(head->data))->key, value) == 0)
 			{
 				free(new_element);
 				return -1;
@@ -94,20 +93,20 @@ int __NG_Set_Add(NG_TableSet set, const void* value, const size_t key_length)
 	{
 		size_t increase_size = set->hashmap_size;
 		if (increase_size < 4) increase_size = 4;
-		__NG_Set_Increase_Hashmap_Size(set, increase_size);
+		__ng_set_increase_hashmap_size(set, increase_size);
 	}
 	return 0;
 }
 
-int __NG_Set_Exists(NG_TableSet set, void* value, const size_t key_length)
+int __ng_set_exists(ng_set set, void* value, const size_t key_length)
 {
 	size_t hash = set->hash_function(value, key_length);
 	size_t index = hash % set->hashmap_size;
 
-	NG_NodeList head = *set->nodes[index]->nodes;
+	ng_node_list head = *set->nodes[index]->nodes;
 	while (head)
 	{
-		if (set->compare_node_function(((NG_KeySet)(head->data))->key, value) == 0)
+		if ((*set->nodes)->compare_function(((NG_KeySet)(head->data))->key, value) == 0)
 		{
 			return 0;
 		}
@@ -116,16 +115,16 @@ int __NG_Set_Exists(NG_TableSet set, void* value, const size_t key_length)
 	return -1;
 }
 
-int __NG_Set_Remove(NG_TableSet set, void* value, const size_t key_length)
+int __ng_set_remove(ng_set set, void* value, const size_t key_length)
 {
 	size_t hash = set->hash_function(value, key_length);
 	size_t index = hash % set->hashmap_size;
 
-	NG_NodeList lastNode;
-	NG_NodeList node = *set->nodes[index]->nodes;
+	ng_node_list lastNode;
+	ng_node_list node = *set->nodes[index]->nodes;
 	while (node)
 	{
-		if (set->compare_node_function(((NG_KeySet)(node->data))->key, value) == 0)
+		if ((*set->nodes)->compare_function(((NG_KeySet)(node->data))->key, value) == 0)
 		{
 			if (lastNode)
 			{
@@ -134,6 +133,7 @@ int __NG_Set_Remove(NG_TableSet set, void* value, const size_t key_length)
 			else {
 				*set->nodes[index]->nodes = node->next;
 			}
+			node->data = NULL;
 			return 0;
 		}
 		lastNode = node;
@@ -142,25 +142,28 @@ int __NG_Set_Remove(NG_TableSet set, void* value, const size_t key_length)
 	return -1;
 }
 
-int __NG_Set_Increase_Hashmap_Size(NG_TableSet set, const size_t size_increase_amount)
+int __ng_set_increase_hashmap_size(ng_set set, const size_t size_increase_amount)
 {
-	NG_TableSet larger_set = __NG_Set_New_Hashed(set->hashmap_size + size_increase_amount, set->hash_function, set->compare_node_function);
-	if (!larger_set)
+	if (size_increase_amount > 0)
 	{
-		return -1;
-	}
-
-	const size_t current_set_size = set->hashmap_size;
-	for (size_t i = 0; i < current_set_size; ++i)
-	{
-		NG_NodeList current_node = *(set->nodes[i]->nodes);
-		while (current_node)
+		ng_set larger_set = __ng_set_new_hashed(set->hashmap_size + size_increase_amount, set->hash_function, (*set->nodes)->compare_function);
+		if (!larger_set)
 		{
-			NG_KeySet node_value = (NG_KeySet)(current_node->data);
-			__NG_Set_Add(larger_set, node_value->key, node_value->key_length);
-			current_node = current_node->next;
+			return -1;
 		}
+
+		const size_t current_set_size = set->hashmap_size;
+		for (size_t i = 0; i < current_set_size; ++i)
+		{
+			ng_node_list current_node = *(set->nodes[i]->nodes);
+			while (current_node)
+			{
+				NG_KeySet node_value = (NG_KeySet)(current_node->data);
+				__ng_set_add(larger_set, node_value->key, node_value->key_length);
+				current_node = current_node->next;
+			}
+		}
+		*set = *larger_set;
 	}
-	*set = *larger_set;
 	return 0;
 }

@@ -1,10 +1,10 @@
 #define CLOVE_SUITE_NAME LinkedListSuite
 #include "..\inc\clove.h"
-#include "..\..\inc\LinkedList.h"
+#include "..\..\inc\linked_list.h"
 
-NG_List list;
+ng_list list;
 
-static int Compare_Ints(const void* v1, const void* v2) {
+static int compare_ints(const void* v1, const void* v2) {
 	int i1 = *(int*)v1;
 	int i2 = *(int*)v2;
 
@@ -15,7 +15,7 @@ static int Compare_Ints(const void* v1, const void* v2) {
 
 CLOVE_SUITE_SETUP()
 {
-	list = NG_List_New(int, Compare_Ints);
+	list = ng_list_new(int, compare_ints);
 }
 
 CLOVE_TEST(ListInitialization)
@@ -26,14 +26,14 @@ CLOVE_TEST(ListInitialization)
 
 CLOVE_TEST(ListIncreaseCapacity)
 {
-	NG_List_Increase_Capacity(list, 5);
+	ng_list_increase_capacity(list, 5);
 	CLOVE_INT_EQ(list->capacity, 10);
 }
 
 CLOVE_TEST(ListAddOneElement)
 {
 	int a = 1;
-	CLOVE_INT_EQ(NG_List_Add(list, &a), 0);
+	CLOVE_INT_EQ(ng_list_add(list, &a), 0);
 	CLOVE_INT_EQ(list->length, 1);
 	CLOVE_INT_EQ(*(int*)((*list->nodes)->data), 1);
 }
@@ -41,17 +41,17 @@ CLOVE_TEST(ListAddOneElement)
 CLOVE_TEST(ListGetFirstElement)
 {
 	int a = 1;
-	NG_List_Add(list, &a);
-	CLOVE_INT_EQ(*(int*)(NG_List_GetAt(list, 0)), 1);
+	ng_list_add(list, &a);
+	CLOVE_INT_EQ(*(int*)(ng_list_get_at(list, 0)), 1);
 }
 
 CLOVE_TEST(ListGetElementOutOfRange)
 {
 	int a = 1;
-	NG_List_Add(list, &a);
-	CLOVE_NULL(NG_List_GetAt(list, -1));
-	CLOVE_NULL(NG_List_GetAt(list, 1));
-	CLOVE_NULL(NG_List_GetAt(list, 2));
+	ng_list_add(list, &a);
+	CLOVE_NULL(ng_list_get_at(list, -1));
+	CLOVE_NULL(ng_list_get_at(list, 1));
+	CLOVE_NULL(ng_list_get_at(list, 2));
 }
 
 CLOVE_TEST(ListReverse)
@@ -59,10 +59,10 @@ CLOVE_TEST(ListReverse)
 	int a = 1;
 	int b = 2; 
 	int c = 3;
-	NG_List_Add(list, &a);
-	NG_List_Add(list, &b);
-	NG_List_Add(list, &c);
-	NG_List reversed_list = NG_List_Reverse(list);
+	ng_list_add(list, &a);
+	ng_list_add(list, &b);
+	ng_list_add(list, &c);
+	ng_list reversed_list = ng_list_reverse(list);
 	CLOVE_INT_EQ(*(int*)((*reversed_list->nodes)->data), 3);
 	CLOVE_INT_EQ(*(int*)((*reversed_list->nodes)->next->data), 2);
 	CLOVE_INT_EQ(*(int*)((*reversed_list->nodes)->next->next->data), 1);
@@ -73,10 +73,10 @@ CLOVE_TEST(ListGetLastElement)
 	int a = 1;
 	int b = 2;
 	int c = 3;
-	NG_List_Add(list, &a);
-	NG_List_Add(list, &b);
-	NG_List_Add(list, &c);
-	CLOVE_INT_EQ(*(int*)NG_List_GetLast(list), 3);
+	ng_list_add(list, &a);
+	ng_list_add(list, &b);
+	ng_list_add(list, &c);
+	CLOVE_INT_EQ(*(int*)ng_list_get_last(list), 3);
 }
 
 CLOVE_TEST(ListRemoveFirstElement)
@@ -84,10 +84,10 @@ CLOVE_TEST(ListRemoveFirstElement)
 	int a = 1;
 	int b = 2;
 	int c = 3;
-	NG_List_Add(list, &a);
-	NG_List_Add(list, &b);
-	NG_List_Add(list, &c);
-	CLOVE_INT_EQ(NG_List_RemoveFirst(list), 0);
+	ng_list_add(list, &a);
+	ng_list_add(list, &b);
+	ng_list_add(list, &c);
+	CLOVE_INT_EQ(ng_list_remove_first(list), 0);
 	CLOVE_INT_EQ(list->length, 2);
 	CLOVE_INT_EQ(*(int*)((*list->nodes)->data), 2);
 }
@@ -97,10 +97,10 @@ CLOVE_TEST(ListRemoveSecondElement)
 	int a = 1;
 	int b = 2;
 	int c = 3;
-	NG_List_Add(list, &a);
-	NG_List_Add(list, &b);
-	NG_List_Add(list, &c);
-	CLOVE_INT_EQ(NG_List_RemoveAt(list, 1), 0);
+	ng_list_add(list, &a);
+	ng_list_add(list, &b);
+	ng_list_add(list, &c);
+	CLOVE_INT_EQ(ng_list_remove_at(list, 1), 0);
 	CLOVE_INT_EQ(list->length, 2);
 	CLOVE_INT_EQ(*(int*)((*list->nodes)->next->data), 3);
 }
@@ -110,10 +110,10 @@ CLOVE_TEST(ListRemoveLastElement)
 	int a = 1;
 	int b = 2;
 	int c = 3;
-	NG_List_Add(list, &a);
-	NG_List_Add(list, &b);
-	NG_List_Add(list, &c);
-	CLOVE_INT_EQ(NG_List_RemoveLast(list), 0);
+	ng_list_add(list, &a);
+	ng_list_add(list, &b);
+	ng_list_add(list, &c);
+	CLOVE_INT_EQ(ng_list_remove_last(list), 0);
 	CLOVE_INT_EQ(list->length, 2);
 	CLOVE_NULL((*list->nodes)->next->next);
 }
@@ -121,10 +121,10 @@ CLOVE_TEST(ListRemoveLastElement)
 CLOVE_TEST(ListRemoveElementOutOfRange)
 {
 	int a = 1;
-	NG_List_Add(list, &a);
-	CLOVE_INT_EQ(NG_List_RemoveAt(list, -1), -1);
-	CLOVE_INT_EQ(NG_List_RemoveAt(list, 1), -1);
-	CLOVE_INT_EQ(NG_List_RemoveAt(list, 2), -1);
+	ng_list_add(list, &a);
+	CLOVE_INT_EQ(ng_list_remove_at(list, -1), -1);
+	CLOVE_INT_EQ(ng_list_remove_at(list, 1), -1);
+	CLOVE_INT_EQ(ng_list_remove_at(list, 2), -1);
 }
 
 CLOVE_TEST(ListRemoveValue)
@@ -132,10 +132,10 @@ CLOVE_TEST(ListRemoveValue)
 	int a = 1;
 	int b = 2;
 	int c = 3;
-	NG_List_Add(list, &a);
-	NG_List_Add(list, &b);
-	NG_List_Add(list, &c);
-	CLOVE_INT_EQ(NG_List_Remove(list, &b), 0);
+	ng_list_add(list, &a);
+	ng_list_add(list, &b);
+	ng_list_add(list, &c);
+	CLOVE_INT_EQ(ng_list_remove(list, &b), 0);
 	CLOVE_INT_EQ(list->length, 2);
 	CLOVE_INT_NE(*(int*)((*list->nodes)->next->data), 2);
 }
