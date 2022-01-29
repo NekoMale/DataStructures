@@ -56,7 +56,7 @@ Just import the single data structure header you need where you need.
 
 | Function | Description |
 | --- | --- |
-| ng_set_new(compare_function)												| Create a **Set** which will contains items of *item_type*. This set will use *compare_function* you'll provide to compare values if needed, a default hashing algorithm and hashmap_size. |
+| ng_set_new(compare_function)												| Create a **Set**. This set will use *compare_function* you'll provide to compare values if needed, a default hashing algorithm and hashmap_size. |
 | ng_set_new_hashed(hashmap_size, custom_hash_function, compare_function) 	| Same of **ng_set_new(compare_function)**. A *hashmap_size* and *custom_hash_function* can be provided |
 | ng_set_increase_hashmap_size(set, size_increase_amount) 					| Increase *set* hashmap size of *size_increase_amount* |
 | ng_set_add(set, value, key_length) 										| Add a new set element to *set* with *value* as value. Its *key_length* will be used to hashing |
@@ -73,7 +73,7 @@ ng_set dictionary = ng_dictionary_new(my_compare_function);
 
 | Function | Description |
 | --- | --- |
-| ng_dictionary_new(compare_function)										| Create a **Dictionary** which will contains keys of *keys_type* anf values of *values_type. This dictionary will use *compare_function* to compare keys when needed, a default hashing algorithm and hashmap size |
+| ng_dictionary_new(compare_function)										| Create a **Dictionary**. This dictionary will use *compare_function* to compare keys when needed, a default hashing algorithm and hashmap size |
 | ng_dictionary_new_hashed(hashmap_size, custom_hash_function, compare_function) 	| Same of **ng_dictionary_new(compare_function)**. A *hashmap_size* and *custom_hash_function* can be provided |
 | ng_dictionary_increase_hashmap_size(dictionary, size_increase_amount) 	| Increase *dictionary* hashmap size of *size_increase_amount* |
 | ng_dictionary_add(dictionary, key, key_length, value) 					| Add a new dictionary element to *dictionary* with *key* as key and *value* as value. Its *key_length* will be used to hashing |
